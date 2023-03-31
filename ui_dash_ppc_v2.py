@@ -1,7 +1,10 @@
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 
-from dash import Dash, dcc, html, Input, Output, State, dash_table
+from dash import Dash, Input, Output, State, dash_table, dcc, html
 from dash.exceptions import PreventUpdate
+
 
 def onoff_print(texto):
     if False:
@@ -55,6 +58,9 @@ def montar_resumo_ppc(df_ppc, disciplinas_ok, CH_optativa):
                 '%_restante': f'{perc_restante:.2f}', 
             }
         )
+
+        if 'Extensão' in dff.columns:
+            aux[-1]['Extensão'] = f"{sum(dff.loc[flag_cursada, 'Extensão'])} de {sum(dff['Extensão'])}"
 
     return pd.DataFrame(aux, index=minha_ordem)
 
@@ -221,10 +227,24 @@ def gera_markdown_de_todas_as_categorias(checklist_values):
     # Construir as tabelas
     cursada = sum(resumo_ppc_1['CH_cursada'])
     restante = sum(resumo_ppc_1['CH_restante'])
+
+    fig1 = go.Figure(
+        data=[
+            go.Bar(name='Cursada', x=resumo_ppc_1['Tipo'], y=resumo_ppc_1['CH_cursada']),
+            go.Bar(name='Restante', x=resumo_ppc_1['Tipo'], y=resumo_ppc_1['CH_restante']),
+        ]
+    )
+    fig1.update_layout(barmode='stack')
+    fig1.update_layout(title_text=f"{cursada}h / {restante}h")
+    fig1.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+
     ret_1 = [
         html.H6('Resumo PPC Anterior:'),
-        html.P(f"Carga horária: {cursada}h cursadas, {restante}h restantes"),
-        html.P(f"Créditos: {cursada/15:.0f} cursados, {restante/15:.0f} restantes"),
+        # html.P(f"Carga horária: {cursada}h cursadas, {restante}h restantes"),
+        # html.P(f"Créditos: {cursada/15:.0f} cursados, {restante/15:.0f} restantes"),
+        dcc.Graph(
+            figure=fig1,
+        ),
         dash_table.DataTable(
             data = resumo_ppc_1.to_dict('records'),
             columns = [{"name": i, "id": i} for i in resumo_ppc_1.columns],
@@ -236,10 +256,24 @@ def gera_markdown_de_todas_as_categorias(checklist_values):
 
     cursada = sum(resumo_ppc_2['CH_cursada'])
     restante = sum(resumo_ppc_2['CH_restante'])
+
+    fig2 = go.Figure(
+        data=[
+            go.Bar(name='Cursada', x=resumo_ppc_2['Tipo'], y=resumo_ppc_2['CH_cursada']),
+            go.Bar(name='Restante', x=resumo_ppc_2['Tipo'], y=resumo_ppc_2['CH_restante']),
+        ]
+    )
+    fig2.update_layout(barmode='stack')
+    fig2.update_layout(title_text=f"{cursada}h / {restante}h")
+    fig2.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+
     ret_2 = [
         html.H6('Resumo PPC Atual:'),
-        html.P(f"Carga horária: {cursada}h dispensadas, {restante}h restantes"),
-        html.P(f"Créditos: {cursada/15:.0f} dispensados, {restante/15:.0f} restantes"),
+        # html.P(f"Carga horária: {cursada}h dispensadas, {restante}h restantes"),
+        # html.P(f"Créditos: {cursada/15:.0f} dispensados, {restante/15:.0f} restantes"),
+        dcc.Graph(
+            figure=fig2,
+        ),
         dash_table.DataTable(
             data = resumo_ppc_2.to_dict('records'),
             columns = [{"name": i, "id": i} for i in resumo_ppc_2.columns],

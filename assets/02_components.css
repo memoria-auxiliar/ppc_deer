@@ -25,7 +25,7 @@ Títulos e subtítulos
 
 .column_style {
     color: rgb(58, 58, 58);
-    background-color: rgb(186, 235, 235);
+    background-color: rgb(255, 255, 255);
     border: 2px solid rgb(183, 191, 238);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.20), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-radius: 4px;
@@ -35,7 +35,7 @@ Títulos e subtítulos
 
 .column_style_sem_center {
     color: rgb(58, 58, 58);
-    background-color: rgb(186, 235, 235);
+    background-color: rgb(255, 255, 255);
     border: 2px solid rgb(183, 191, 238);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.20), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-radius: 4px;
@@ -44,7 +44,7 @@ Títulos e subtítulos
 
 .column_cont_style {
     color: rgb(58, 58, 58);
-    background-color: rgb(186, 235, 235);
+    background-color: rgb(255, 255, 255);
     border: 2px solid rgb(183, 191, 238);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.20), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-radius: 4px;

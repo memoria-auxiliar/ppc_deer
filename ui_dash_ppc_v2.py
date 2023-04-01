@@ -64,6 +64,26 @@ def montar_resumo_ppc(df_ppc, disciplinas_ok, CH_optativa):
 
     return pd.DataFrame(aux, index=minha_ordem)
 
+def obter_lista_de_disciplinas_para_dispensa(df12, df1, df2):
+
+    onoff_print(f'obter_lista_de_disciplinas_para_dispensa:')
+
+    ret = []
+    for idx, row in df12.iterrows():
+
+            # obtém ocorrências de "idx" em df_eqv...
+            d1 = [item.strip() for item in row['Disciplina_1'].split('&&')]
+            d2 = [item.strip() for item in row['Disciplina_2'].split('&&')]
+
+            ch1 = [df1.loc[item, 'CH'] for item in d1]
+            ch2 = [df2.loc[item, 'CH'] for item in d2]
+
+            if sum(ch1) < sum(ch2):
+                aux = [item for item in d1 if d1 not in ret]
+                ret.extend(aux)
+
+    return ret
+
 # Ler dados de entrada
 
 dados = pd.read_excel('./dados/Tabela de Equivalências_DEER.xlsx', None)
@@ -80,11 +100,7 @@ df_eqv = dados['Equivalências']
 df_eqv['Disciplina_1'] = df_eqv['Disciplina_1'].str.strip()
 df_eqv['Disciplina_2'] = df_eqv['Disciplina_2'].str.strip()
 
-# # depuração
-# onoff_print(f'df_ppc_1.head(5) = \n{df_ppc_1.head(5)}\n=====')
-# onoff_print(f'df_ppc_2.head(5) = \n{df_ppc_2.head(5)}\n=====')
-# onoff_print(f'df_eqv.head(5) = \n{df_eqv.head(5)}\n=====')
-# breakpoint()
+disc_com_aumento = obter_lista_de_disciplinas_para_dispensa(df_eqv, df_ppc_1, df_ppc_2)
 
 # ==============================================================================
 # Dash App - Layout
@@ -116,12 +132,23 @@ app.layout = html.Div(
                         dcc.Checklist(
                             id=f'checklist_ppc_1',
                             options=[
-                                {'label': f'{periodo} - {disciplina} - {creditos} créditos', 'value': disciplina}
+                                {
+                                    'label': html.B(f'{periodo} - {disciplina} - {creditos} créditos *'), 
+                                    'value': disciplina
+                                }
+                                if disciplina in disc_com_aumento
+                                else
+                                {
+                                    'label': f'{periodo} - {disciplina} - {creditos} créditos', 
+                                    'value': disciplina
+                                }
                                 for periodo, disciplina, creditos in zip(df_ppc_1['Período'], df_ppc_1.index, df_ppc_1['Créditos'])
                             ],
                             # # depuração: marcar todas as check
                             # value=df_ppc_1.index,
                         ),
+                        html.Hr(),
+                        html.B('* Significa que será preciso abrir processo de dispensa.'),
                     ],
                     className="six columns column_style_sem_center zera_margin-left",
                 ),
@@ -239,7 +266,7 @@ def gera_markdown_de_todas_as_categorias(checklist_values):
     fig1.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
     ret_1 = [
-        html.H6('Resumo PPC Anterior:'),
+        html.H6('Resumo PPC Anterior (CH 3855h):'),
         # html.P(f"Carga horária: {cursada}h cursadas, {restante}h restantes"),
         # html.P(f"Créditos: {cursada/15:.0f} cursados, {restante/15:.0f} restantes"),
         dcc.Graph(
@@ -268,7 +295,7 @@ def gera_markdown_de_todas_as_categorias(checklist_values):
     fig2.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
     ret_2 = [
-        html.H6('Resumo PPC Atual:'),
+        html.H6('Resumo PPC Atual (CH 3900h):'),
         # html.P(f"Carga horária: {cursada}h dispensadas, {restante}h restantes"),
         # html.P(f"Créditos: {cursada/15:.0f} dispensados, {restante/15:.0f} restantes"),
         dcc.Graph(

@@ -68,7 +68,8 @@ def obter_lista_de_disciplinas_para_dispensa(df12, df1, df2):
 
     onoff_print(f'obter_lista_de_disciplinas_para_dispensa:')
 
-    ret = []
+    ret1 = []
+    ret2 = []
     for idx, row in df12.iterrows():
 
             # obtém ocorrências de "idx" em df_eqv...
@@ -79,10 +80,11 @@ def obter_lista_de_disciplinas_para_dispensa(df12, df1, df2):
             ch2 = [df2.loc[item, 'CH'] for item in d2]
 
             if sum(ch1) < sum(ch2):
-                aux = [item for item in d1 if d1 not in ret]
-                ret.extend(aux)
-
-    return ret
+                aux = [item for item in d1 if item not in ret1]
+                ret1.extend(aux)
+                aux = [item for item in d2 if item not in ret2]
+                ret2.extend(aux)
+    return ret1, ret2
 
 # Ler dados de entrada
 
@@ -100,7 +102,8 @@ df_eqv = dados['Equivalências']
 df_eqv['Disciplina_1'] = df_eqv['Disciplina_1'].str.strip()
 df_eqv['Disciplina_2'] = df_eqv['Disciplina_2'].str.strip()
 
-disc_com_aumento = obter_lista_de_disciplinas_para_dispensa(df_eqv, df_ppc_1, df_ppc_2)
+disc_com_aumento_1, disc_com_aumento_2 = \
+    obter_lista_de_disciplinas_para_dispensa(df_eqv, df_ppc_1, df_ppc_2)
 
 # ==============================================================================
 # Dash App - Layout
@@ -116,7 +119,7 @@ app.layout = html.Div(
                     children=[
                         '''
                         ### Simulador de migração de PPC - DEER/CEAR
-                        Versão 0.0 - 31/03/2023 - Desenvolvimento: CEARDados
+                        Versão 0.0 - 05/04/2023 - Desenvolvimento: CEARDados
                         '''
                     ],
                     className="twelve columns column_style",
@@ -133,10 +136,10 @@ app.layout = html.Div(
                             id=f'checklist_ppc_1',
                             options=[
                                 {
-                                    'label': html.B(f'{periodo} - {disciplina} - {creditos} créditos *'), 
+                                    'label': html.B(f'{periodo} - {disciplina} - {creditos} créditos*'), 
                                     'value': disciplina
                                 }
-                                if disciplina in disc_com_aumento
+                                if disciplina in disc_com_aumento_1
                                 else
                                 {
                                     'label': f'{periodo} - {disciplina} - {creditos} créditos', 
@@ -158,6 +161,13 @@ app.layout = html.Div(
                         dcc.Checklist(
                             id=f'checklist_ppc_2',
                             options=[
+                                {
+                                    'label': html.B(f'{periodo} - {disciplina} - {creditos} créditos*'), 
+                                    'value': disciplina,
+                                    'disabled': True,
+                                }
+                                if disciplina in disc_com_aumento_2
+                                else
                                 {
                                     'label': f'{periodo} - {disciplina} - {creditos} créditos', 
                                     'value': disciplina,
@@ -314,4 +324,4 @@ def gera_markdown_de_todas_as_categorias(checklist_values):
 
 if __name__ == '__main__':
     app.run_server(debug=False)
-    # app.run_server(debug=True, port=8000)
+    # app.run_server(debug=True, port=8050)

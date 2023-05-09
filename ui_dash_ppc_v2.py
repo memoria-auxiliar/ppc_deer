@@ -119,8 +119,9 @@ app.layout = html.Div(
                     children=[
                         '''
                         ### Simulador de migração de PPC - DEER/CEAR
-                        Versão 0.0 - 05/04/2023 - Desenvolvimento: CEARDados
+                        Versão 0.1 - 08/05/2023 - Desenvolvimento: CEARDados
                         '''
+                        # Versão 0.0 - 05/04/2023 - Desenvolvimento: CEARDados
                     ],
                     className="twelve columns column_style",
                 ),
